@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Title Encrypter - API Version</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .upload-box {
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-box:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .upload-box.dragover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-green { background: #28a745; }
+        .btn-green:hover { background: #218838; }
+        
+        .btn-red { background: #dc3545; }
+        .btn-red:hover { background: #c82333; }
+        
+        .btn-purple { background: #6f42c1; }
+        .btn-purple:hover { background: #5a32a3; }
+        
+        .settings-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .file-list {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .file-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .file-details {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .encrypted {
+            color: #28a745;
+        }
+        
+        .original {
+            color: #6c757d;
+        }
+        
+        .loading {
+            color: #ffc107;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .key-display {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Data Title Encrypter - API Version</h1>
+            <p>Upload files and encrypt titles using secure Python API</p>
+        </div>
+
+        <div id="statusMessage" class="status-message hidden"></div>
+
+        <div id="uploadBox" class="upload-box">
+            <div class="upload-icon">📁</div>
+            <h3>Drop files here or click to browse</h3>
+            <p>Files will be encrypted using secure API</p>
+            <input type="file" id="fileInput" multiple style="display: none;">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">Browse Files</button>
+        </div>
+
+        <div class="settings-box">
+            <h3>🔧 API Settings</h3>
+            <div class="form-group">
+                <label for="apiUrl">Python API URL</label>
+                <input type="text" id="apiUrl" placeholder="http://localhost:5000/encrypt" value="http://localhost:5000/encrypt">
+            </div>
+            <div class="form-group">
+                <label for="encryptionMethod">Encryption Method</label>
+                <select id="encryptionMethod">
+                    <option value="aes">AES Encryption</option>
+                    <option value="fernet">Fernet Encryption</option>
+                    <option value="base64">Base64 Encoding</option>
+                    <option value="caesar">Caesar Cipher</option>
+                </select>
+            </div>
+            <button class="btn" onclick="testApiConnection()">🔗 Test API Connection</button>
+        </div>
+
+        <div id="fileList" class="file-list">
+            <h3>📁 Uploaded Files</h3>
+            <div id="filesContainer"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-green" onclick="encryptAllFiles()">🔐 Encrypt All via API</button>
+                <button class="btn btn-purple" onclick="downloadList()">📥 Download Results</button>
+                <button class="btn btn-red" onclick="clearAllFiles()">🗑️ Clear All</button>
+            </div>
+        </div>
+
+        <div id="encryptionResults" class="settings-box hidden">
+            <h3>🔑 Encryption Results</h3>
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFiles = [];
+        let encryptionResults = [];
+        
+        const uploadBox = document.getElementById('uploadBox');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const filesContainer = document.getElementById('filesContainer');
+        const statusMessage = document.getElementById('statusMessage');
+        const encryptionResultsDiv = document.getElementById('encryptionResults');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        // Click to upload
+        uploadBox.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadBox.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadBox.classList.add('dragover');
+        });
+
+        uploadBox.addEventListener('dragleave', function() {
+            uploadBox.classList.remove('dragover');
+        });
+
+        uploadBox.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadBox.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            handleFiles(e.target.files);
+        });
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message status-' + type;
+            statusMessage.classList.remove('hidden');
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileObj = {
+                    id: Date.now() + Math.random(),
+                    originalName: file.name,
+                    encryptedName: file.name,
+                    size: file.size,
+                    type: file.type || 'Unknown',
+                    status: 'original', // original, encrypting, encrypted, error
+                    encryptionKey: null,
+                    error: null
+                };
+                uploadedFiles.push(fileObj);
+            }
+            updateFileList();
+            showStatus(`Added ${files.length} file(s) for encryption`, 'success');
+        }
+
+        function updateFileList() {
+            if (uploadedFiles.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+
+            fileList.style.display = 'block';
+            filesContainer.innerHTML = '';
+
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const file = uploadedFiles[i];
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                
+                let statusText = '';
+                let statusClass = '';
+                
+                switch(file.status) {
+                    case 'original':
+                        statusText = '🔓 Ready for encryption';
+                        statusClass = 'original';
+                        break;
+                    case 'encrypting':
+                        statusText = '⏳ Encrypting...';
+                        statusClass = 'loading';
+                        break;
+                    case 'encrypted':
+                        statusText = '🔐 Encrypted';
+                        statusClass = 'encrypted';
+                        break;
+                    case 'error':
+                        statusText = '❌ Error: ' + file.error;
+                        statusClass = 'error';
+                        break;
+                }
+                
+                fileDiv.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">${file.encryptedName}</div>
+                        <div class="file-details">
+                            ${formatFileSize(file.size)} • ${file.type} • 
+                            <span class="${statusClass}">${statusText}</span>
+                        </div>
+                        ${file.encryptionKey ? `<div class="key-display">Key: ${file.encryptionKey}</div>` : ''}
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-small" onclick="encryptSingleFile('${file.id}')" 
+                                ${file.status === 'encrypting' ? 'disabled' : ''}>
+                            ${file.status === 'encrypted' ? 'Re-encrypt' : 'Encrypt'}
+                        </button>
+                        <button class="btn btn-red btn-small" onclick="removeFile('${file.id}')">
+                            Remove
+                        </button>
+                    </div>
+                `;
+                
+                filesContainer.appendChild(fileDiv);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        async function testApiConnection() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            
+            try {
+                showStatus('Testing API connection...', 'info');
+                
+                const response = await fetch(apiUrl + '/test', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus('✅ API connection successful!', 'success');
+                } else {
+                    showStatus('❌ API connection failed: ' + response.status, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Cannot connect to API: ' + error.message, 'error');
+            }
+        }
+
+        async function encryptSingleFile(fileId) {
+            const file = uploadedFiles.find(function(f) { return f.id == fileId; });
+            if (!file) return;
+
+            const apiUrl = document.getElementById('apiUrl').value;
+            const method = document.getElementById('encryptionMethod').value;
+
+            file.status = 'encrypting';
+            updateFileList();
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: file.originalName,
+                        method: method
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    file.encryptedName = data.encrypted_text;
+                    file.encryptionKey = data.key;
+                    file.status = 'encrypted';
+                    file.error = null;
+                    
+                    showStatus('✅ File encrypted successfully!', 'success');
+                } else {
+                    const errorData = await response.json();
+                    file.status = 'error';
+                    file.error = errorData.error || 'Unknown error';
+                    showStatus('❌ Encryption failed: ' + file.error, 'error');
+                }
+            } catch (error) {
+                file.status = 'error';
+                file.error = error.message;
+                showStatus('❌ Network error: ' + error.message, 'error');
+            }
+
+            updateFileList();
+        }
+
+        async function encryptAllFiles() {
+            const unencryptedFiles = uploadedFiles.filter(f => f.status === 'original' || f.status === 'error');
+            
+            if (unencryptedFiles.length === 0) {
+                showStatus('No files to encrypt', 'info');
+                return;
+            }
+
+            showStatus(`Encrypting ${unencryptedFiles.length} files...`, 'info');
+
+            for (let i = 0; i < unencryptedFiles.length; i++) {
+                await encryptSingleFile(unencryptedFiles[i].id);
+                // Small delay to prevent overwhelming the API
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            const successCount = uploadedFiles.filter(f => f.status === 'encrypted').length;
+            showStatus(`✅ Encryption complete! ${successCount}/${uploadedFiles.length} files encrypted`, 'success');
+        }
+
+        function removeFile(fileId) {
+            uploadedFiles = uploadedFiles.filter(function(f) { return f.id != fileId; });
+            updateFileList();
+        }
+
+        function downloadList() {
+            if (uploadedFiles.length === 0) return;
+
+            let content = 'Original Name | Encrypted Name | Size | Type | Status | Encryption Key\n';
+            content += '-------------------------------------------------------------------------\n';
+            
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const file = uploadedFiles[i];
+                content += `${file.originalName} | ${file.encryptedName} | ${formatFileSize(file.size)} | ${file.type} | ${file.status} | ${file.encryptionKey || 'N/A'}\n`;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'encryption_results.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAllFiles() {
+            uploadedFiles = [];
+            updateFileList();
+            fileInput.value = '';
+            showStatus('All files cleared', 'info');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98751675f0a4777c',t:'MTc1OTI0OTY0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
